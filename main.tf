@@ -11,8 +11,7 @@ locals {
 
 resource "aws_db_instance" "default" {
   count             = var.enabled ? 1 : 0
-  identifier        = module.label.id
-  name              = module.label.id
+  identifier        = module.rds_label.id
   username          = var.database_user
   password          = var.database_password
   port              = var.database_port
@@ -54,7 +53,7 @@ resource "aws_db_instance" "default" {
 
 resource "aws_db_parameter_group" "default" {
   count  = length(var.parameter_group_name) == 0 && var.enabled ? 1 : 0
-  name   = module.label.id
+  name   = module.rds_param_group.id
   family = var.db_parameter_group
   tags   = module.label.tags
 
@@ -70,7 +69,7 @@ resource "aws_db_parameter_group" "default" {
 
 resource "aws_db_option_group" "default" {
   count                = length(var.option_group_name) == 0 && var.enabled ? 1 : 0
-  name                 = module.label.id
+  name                 = module.rds_option_group.id
   engine_name          = var.engine
   major_engine_version = local.major_engine_version
   tags                 = module.label.tags
@@ -108,7 +107,7 @@ resource "aws_db_subnet_group" "default" {
 
 resource "aws_security_group" "default" {
   count       = var.enabled ? 1 : 0
-  name        = module.label.id
+  name        = module.rds_sg.id
   description = "Allow inbound traffic from the security groups"
   vpc_id      = var.vpc_id
 
@@ -129,10 +128,11 @@ resource "aws_security_group" "default" {
   tags = module.label.tags
 }
 
-module "dns_host_name" {
-  source  = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.3.0"
-  enabled = length(var.dns_zone_id) > 0 && var.enabled ? true : false
-  name    = var.host_name
-  zone_id = var.dns_zone_id
-  records = coalescelist(aws_db_instance.default.*.address, [""])
-}
+# Need to clarify with Roger & Ivan if we're going to need DNS
+# module "dns_host_name" {
+#   source  = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.3.0"
+#   enabled = length(var.dns_zone_id) > 0 && var.enabled ? true : false
+#   name    = var.host_name
+#   zone_id = var.dns_zone_id
+#   records = coalescelist(aws_db_instance.default.*.address, [""])
+# }
