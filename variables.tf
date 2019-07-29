@@ -35,6 +35,7 @@ variable "associate_security_group_ids" {
 variable "database_name" {
   type        = string
   description = "The name of the database to create when the DB instance is created"
+  default     = ""
 }
 
 variable "database_user" {
@@ -139,11 +140,14 @@ variable "publicly_accessible" {
   default     = false
 }
 
-variable "subnet_ids" {
-  description = "List of subnets for the DB"
+variable "public_subnet_ids" {
+  description = "List of public subnets within the region VPC"
   type        = list(string)
 }
-
+variable "private_subnet_ids" {
+  description = "List of prviate subnets within the region VPC"
+  type        = list(string)
+}
 variable "vpc_id" {
   type        = string
   description = "VPC ID the DB instance will be created in"
