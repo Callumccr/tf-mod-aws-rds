@@ -256,12 +256,6 @@ variable "kms_key_arn" {
   default     = ""
 }
 
-variable "rds_config" {
-  type        = map(any)
-  description = "A collection of of values to deploy an RDS Instance"
-}
-
-
 /*****
 Label Module Variables
 *****/
