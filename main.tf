@@ -100,9 +100,9 @@ resource "aws_db_option_group" "default" {
 
 resource "aws_db_subnet_group" "default" {
   count      = var.enabled ? 1 : 0
-  name       = module.label.id
+  name       = module.subnet_group_label.id
   subnet_ids = var.subnet_ids
-  tags       = module.rds_label.tags
+  tags       = module.subnet_group_label.tags
 }
 
 resource "aws_security_group" "default" {
