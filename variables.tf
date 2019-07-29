@@ -140,14 +140,11 @@ variable "publicly_accessible" {
   default     = false
 }
 
-variable "public_subnet_ids" {
-  description = "List of public subnets within the region VPC"
+variable "subnet_ids" {
+  description = "List of subnets for the DB"
   type        = list(string)
 }
-variable "private_subnet_ids" {
-  description = "List of prviate subnets within the region VPC"
-  type        = list(string)
-}
+
 variable "vpc_id" {
   type        = string
   description = "VPC ID the DB instance will be created in"
@@ -258,6 +255,12 @@ variable "kms_key_arn" {
   description = "The ARN of the existing KMS key to encrypt storage"
   default     = ""
 }
+
+variable "rds_config" {
+  type        = map(any)
+  description = "A collection of of values to deploy an RDS Instance"
+}
+
 
 /*****
 Label Module Variables
