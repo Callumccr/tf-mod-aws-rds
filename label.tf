@@ -8,14 +8,14 @@ module "rds_label" {
 module "subnet_group_label" {
   source             = "git::https://github.com/cloudposse/terraform-null-label.git?ref=0.14.1"
   context            = var.context
-  attributes         = ["subnet-group"]
+  attributes         = ["rds-subnet-group"]
   delimiter          = "-"
   additional_tag_map = {} /* Additional attributes (e.g. 1) */
 }
 module "rds_param_group" {
   source             = "git::https://github.com/cloudposse/terraform-null-label.git?ref=0.14.1"
   context            = var.context
-  attributes         = ["pg"]
+  attributes         = ["rds-pg"]
   delimiter          = "-"
   additional_tag_map = {} /* Additional attributes (e.g. 1) */
 }
@@ -23,14 +23,14 @@ module "rds_param_group" {
 module "rds_option_group" {
   source             = "git::https://github.com/cloudposse/terraform-null-label.git?ref=0.14.1"
   context            = var.context
-  attributes         = ["og"]
+  attributes         = ["rds-og"]
   delimiter          = "-"
   additional_tag_map = {} /* Additional attributes (e.g. 1) */
 }
 module "rds_sg" {
   source             = "git::https://github.com/cloudposse/terraform-null-label.git?ref=0.14.1"
   context            = var.context
-  attributes         = ["sg"]
+  attributes         = ["rds-sg"]
   delimiter          = "-"
   additional_tag_map = {} /* Additional attributes (e.g. 1) */
 }
