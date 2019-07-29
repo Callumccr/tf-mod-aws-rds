@@ -46,7 +46,7 @@ resource "aws_db_instance" "default" {
   copy_tags_to_snapshot       = var.copy_tags_to_snapshot
   backup_retention_period     = var.backup_retention_period
   backup_window               = var.backup_window
-  tags                        = module.label.tags
+  tags                        = module.rds_label.tags
   deletion_protection         = var.deletion_protection
   final_snapshot_identifier   = length(var.final_snapshot_identifier) > 0 ? var.final_snapshot_identifier : module.final_snapshot_label.id
 }
@@ -55,7 +55,7 @@ resource "aws_db_parameter_group" "default" {
   count  = length(var.parameter_group_name) == 0 && var.enabled ? 1 : 0
   name   = module.rds_param_group.id
   family = var.db_parameter_group
-  tags   = module.label.tags
+  tags   = module.rds_param_group.tags
 
   dynamic "parameter" {
     for_each = var.db_parameter
@@ -72,7 +72,7 @@ resource "aws_db_option_group" "default" {
   name                 = module.rds_option_group.id
   engine_name          = var.engine
   major_engine_version = local.major_engine_version
-  tags                 = module.label.tags
+  tags                 = module.rds_option_group.tags
 
   dynamic "option" {
     for_each = var.db_options
@@ -102,7 +102,7 @@ resource "aws_db_subnet_group" "default" {
   count      = var.enabled ? 1 : 0
   name       = module.label.id
   subnet_ids = var.subnet_ids
-  tags       = module.label.tags
+  tags       = module.rds_label.tags
 }
 
 resource "aws_security_group" "default" {
@@ -125,7 +125,7 @@ resource "aws_security_group" "default" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = module.label.tags
+  tags = module.rds_sg.tags
 }
 
 # Need to clarify with Roger & Ivan if we're going to need DNS
