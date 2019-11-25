@@ -1,10 +1,32 @@
-/*****
-Module Variables
-*****/
+# -----------------------------------------------------------------------------
+# Variables: Common AWS Provider - Autoloaded from Terragrunt
+# -----------------------------------------------------------------------------
+
+variable "aws_region" {
+  description = "The AWS region (e.g. ap-southeast-2). Autoloaded from region.tfvars."
+  type        = string
+  default     = ""
+}
+
+variable "aws_account_id" {
+  description = "The AWS account id of the provider being deployed to (e.g. 12345678). Autoloaded from account.tfvars"
+  type        = string
+  default     = ""
+}
+
+variable "aws_assume_role_arn" {
+  description = "ARN of the IAM role when optionally connecting to AWS via assumed role. Autoloaded from account.tfvars."
+  type        = string
+  default     = ""
+}
+
+# -----------------------------------------------------------------------------
+# Variables: TF-MOD-RDS - https://github.com/aciem-admin/tf-mod-rds
+# -----------------------------------------------------------------------------
 
 variable "enabled" {
+  description = "(Optional). A Switch that decides whether to create a terraform resource or run a provisioner. Default is true"
   type        = bool
-  description = "Set to false to prevent the module from creating any resources"
   default     = true
 }
 
@@ -256,9 +278,9 @@ variable "kms_key_arn" {
   default     = ""
 }
 
-/*****
-Label Module Variables
-*****/
+# -----------------------------------------------------------------------------
+# Variables: TF-MOD-LABEL - https://github.com/aciem-admin/tf-mod-label
+# -----------------------------------------------------------------------------
 
 variable "namespace" {
   type        = string
