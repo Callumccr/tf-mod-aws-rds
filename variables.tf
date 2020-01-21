@@ -42,11 +42,12 @@ variable "host_name" {
   description = "The DB host name created in Route53"
 }
 
-variable "security_group_id" {
+variable "security_group_ids" {
   type        = list(string)
   default     = []
-  description = "Security Group ID"
+  description = "Security Group IDs to pass to the module security group for 'ingress' traffic"
 }
+
 variable "service_ports" {
   type        = list(string)
   default     = ["11211", "-1", "1"]
