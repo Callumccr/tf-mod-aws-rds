@@ -9,7 +9,7 @@ locals {
   major_engine_version          = var.major_engine_version == "" ? local.computed_major_engine_version : var.major_engine_version
 }
 
-resource "aws_db_instance" "default" {
+resource "aws_db_instance" "rds" {
   count             = var.enabled ? 1 : 0
   identifier        = module.rds_label.id
   username          = var.database_user
@@ -51,7 +51,7 @@ resource "aws_db_instance" "default" {
   final_snapshot_identifier   = length(var.final_snapshot_identifier) > 0 ? var.final_snapshot_identifier : module.final_snapshot_label.id
 }
 
-resource "aws_db_parameter_group" "default" {
+resource "aws_db_parameter_group" "rds" {
   count  = length(var.parameter_group_name) == 0 && var.enabled ? 1 : 0
   name   = module.rds_param_group.id
   family = var.db_parameter_group
@@ -67,7 +67,7 @@ resource "aws_db_parameter_group" "default" {
   }
 }
 
-resource "aws_db_option_group" "default" {
+resource "aws_db_option_group" "rds" {
   count                = length(var.option_group_name) == 0 && var.enabled ? 1 : 0
   name                 = module.rds_option_group.id
   engine_name          = var.engine
@@ -98,31 +98,41 @@ resource "aws_db_option_group" "default" {
   }
 }
 
-resource "aws_db_subnet_group" "default" {
+resource "aws_db_subnet_group" "rds" {
   count      = var.enabled ? 1 : 0
   name       = module.subnet_group_label.id
   subnet_ids = var.subnet_ids
   tags       = module.subnet_group_label.tags
 }
 
-resource "aws_security_group" "default" {
-  count       = var.enabled ? 1 : 0
+resource "aws_security_group" "rds" {
+  count       = var.enabled ? length(var.security_group_ids) : 0
   name        = module.rds_sg.id
   description = "Allow inbound traffic from the security groups"
   vpc_id      = var.vpc_id
 
-  ingress {
-    from_port       = var.database_port
-    to_port         = var.database_port
+  dynamic "ingress" {
+    for_each        = var.service_ports
+    from_port       = ingress.value
+    to_port         = ingress.value
     protocol        = "tcp"
-    security_groups = var.security_group_ids
+    security_groups = element(var.security_group_ids, count.index)
   }
 
-  egress {
+  dynamic "ingress" {
+    for_each    = var.ingress_ranges
+    from_port   = 3306
+    to_port     = 3305
+    protocol    = "tcp"
+    cidr_blocks = ingress.value
+  }
+
+  dynamic "egress" {
+    for_each    = var.egress_ranges
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = egress.value
   }
 
   tags = module.rds_sg.tags

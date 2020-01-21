@@ -42,10 +42,27 @@ variable "host_name" {
   description = "The DB host name created in Route53"
 }
 
-variable "security_group_ids" {
+variable "security_group_id" {
   type        = list(string)
   default     = []
-  description = "The IDs of the security groups from which to allow `ingress` traffic to the DB instance"
+  description = "Security Group ID"
+}
+variable "service_ports" {
+  type        = list(string)
+  default     = ["11211", "-1", "1"]
+  description = "MemcacheD service ports"
+}
+
+variable "ingress_ranges" {
+  type        = list(string)
+  default     = ["10.1.5.0/24", "10.212.134.0/24"]
+  description = "RDS ingress ranges"
+}
+
+variable "egress_ranges" {
+  type        = list(string)
+  default     = ["52.94.13.0/24", "54.231.240.0/22", "52.95.128.0/21", "52.92.52.0/22", "52.219.32.0/21", "52.219.40.0/22", "54.231.252.0/24", "54.231.248.0/22", "52.219.76.0/22", "52.92.56.0/22"]
+  description = "RDS egress ranges"
 }
 
 variable "associate_security_group_ids" {

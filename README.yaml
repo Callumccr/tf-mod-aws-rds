@@ -1,0 +1,340 @@
+---
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+# Name of this project
+name: tf-mod-eks-cluster
+
+# Canonical GitHub repo
+gitlab_repo: https://git.testplant.com/devops/tf-mod-eks-cluster
+
+# Badges to display
+# badges:
+#   - name: "Gitlab Build Status"
+#     image: ""
+#     url: ""
+
+# Short description of this project
+description: |-
+  A Core Eggplant Terraform module to create an Elastic Kubernetes (EKS) cluster.
+
+# How to use this project
+usage: |-
+  The below values shown in the usage of this module are purely representative, please replace desired values as required.
+  ```hcl
+  module "tf-mod-eks-cluster" {
+    source                      = "git::https://git.testplant.com/devops/tf-mod-eks-cluster.git?ref=master"
+    enabled                     = true
+    aws_account_id              = "12345678910"
+    oidc_provider_enabled       = true
+    aws_region                  = "eu-west-1"
+    enable_dashboard            = true
+    enable_kube2iam             = false
+    enable_calico               = true
+    enable_cluster_autoscaler   = true
+    kubeconfig_path             = "./kube/config"
+    kubernetes_version          = "1.14"
+    vpc_id                      = "vpc-06ea6c4fddc9898c4"
+    subnet_ids                  = ["subnet-07bc79d21d0719c1a", "subnet-0bbadaa3bb0376c6c", "subnet-0f7201168a8f3aa3b"]
+    map_additional_iam_roles    = [{
+      rolearn  = "arn:aws:iam::12345678910:role/role"
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups   = ["system:masters"]
+    }]
+    map_additional_iam_users    = [{
+      userarn  = "arn:aws:iam::123456789:user/user"
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups   = ["system:masters"]
+    }]
+    map_additional_aws_accounts = ["12345678911"]
+    workers_security_group_ids  = ["sg-12345678910"]
+    workers_role_arns           = ["arn:aws:iam::12345678910:role/role"]
+  }
+  ```
+include:
+  - "docs/terraform.md"
+
+# Screenshots
+screenshots:
+  - name: "demo"
+    description: "A deployed EKS cluster using this module"
+    url: "https://eggplant-web-assets.s3.eu-west-2.amazonaws.com/README_assets/tf-mod-eks-cluster.png"
+    exection: |-
+
+# Introduction to the project
+introduction: |-
+  The module provisions the following resources:
+    - EKS cluster of master nodes that can be used together with the `tf-mod-eks-workers` module to create a full-blown cluster
+    - IAM Role to allow the cluster to access other AWS services
+    - Security Group which is used by EKS workers to connect to the cluster and kubelets and pods to receive communication from the cluster control plane (see terraform-aws-eks-workers)
+    - Deploys the kubernetes dashboard functionality  (https://aws.amazon.com/premiumsupport/knowledge-center/eks-cluster-kubernetes-dashboard/)
+    - Configures and deploys the cluster autoscaler which automatically adjusts the number of nodes in your cluster when pods fail to launch due to lack of resources or when nodes in the cluster are underutilized and their pods can be rescheduled onto other nodes in the cluster.
+    - Implements Calico network policy enforcement which implements network segmentation and tenant isolation.
+    - Deploys the kube2iam DeamonSet to provides different AWS IAM roles for pods running on Kubernetes (replaced now by AWS IAM roles being assumed by kubernetes service accounts https://aws.amazon.com/about-aws/whats-new/2019/09/amazon-eks-adds-support-to-assign-iam-permissions-to-kubernetes-service-accounts/)
+
+  **IMPORTANT:** 
+    - The module creates and automatically applies (via kubectl apply) an authentication ConfigMap to allow the wrokers nodes to join the cluster and to add additional users/roles/accounts
+    - Currently, the Terraform API for the resource `aws_iam_openid_connect_provider` used for granting Kubernetes serviceaccounts access to IAM roles doesn't automatically generate a thumbprint for the CA. Using a kubergrunt command managed by this module to get around this. Information on this issue can be found [here](https://medium.com/@marcincuber/amazon-eks-with-oidc-provider-iam-roles-for-kubernetes-services-accounts-59015d15cb0c)
+
+examples: |-
+  ### Advanced Example 1
+
+  The following example generates consistent names and tags for resources, a network stack, and a EKS cluster with workers.
+
+  ```hcl
+  module "label" {
+    source             = "git::https:/git.testplant.com/devops/tf-mod-label.git?ref=master"
+    namespace          = "hostedplatform"
+    environment        = "prod"
+    name               = "epa"
+    attributes         = [""]
+    delimiter          = "-"
+    additional_tag_map = {} /* Additional attributes (e.g. 1) */
+    label_order        = ["environment", "namespace", "name", "attributes"]
+    tags = {
+      "project" = "tf-proj-epa"
+      "owner"   = "epa"
+    }
+  }
+
+  locals {
+    tags = merge(module.label.tags, map("kubernetes.io/cluster/${module.label.id}-cluster", "shared"))
+    eks_worker_ami_name_filter = "amazon-eks-node-1.14.*"
+  }
+
+  module "tf-mod-vpc" {
+    source         = "git::https:/git.testplant.com/devops/tf-mod-vpc.git?ref=master"
+    enabled        = true
+    aws_account_id = "12345678910"
+    aws_region     = "eu-west-1"
+    context        = module.label.context
+    cidr_block     = "x.x.x.x/x"
+    tags           = local.tags
+  }
+
+  module "tf-mod-vpc-subnets" {
+    source                  = "git::https:/git.testplant.com/devops/tf-mod-vpc.git//modules/subnets?ref=master"
+    enabled                 = true
+    aws_account_id          = "12345678910"
+    aws_region              = "eu-west-1"
+    context                 = module.label.context
+    vpc_id                  = module.tf-mod-vpc.vpc_id
+    igw_id                  = module.tf-mod-vpc.igw_id
+    cidr_block              = module.tf-mod-vpc.vpc_cidr_block
+    availability_zones      = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
+    nat_gateway_enabled     = true
+    nat_instance_enabled    = false
+    map_public_ip_on_launch = true
+    tags                    = local.tags
+  }
+
+  module "tf-mod-aws-keypair" {
+    source         = "git::https://git.testplant.com/devops/tf-mod-aws-keypair.git?ref=master"
+    context        = module.label.context
+    enabled        = true
+    aws_account_id = "12345678910"
+    aws_region     = "eu-west-1"
+    public_key     = "ssh-rsa ..."
+  }
+
+  module "tf-mod-eks-cluster" {
+    source                      = "git::https://git.testplant.com/devops/tf-mod-eks-cluster.git?ref=master"
+    context                     = module.label.context
+    enabled                     = true
+    aws_account_id              = "12345678910"
+    oidc_provider_enabled       = true
+    aws_region                  = "eu-west-1"
+    enable_dashboard            = true
+    enable_kube2iam             = false
+    enable_calico               = true
+    enable_cluster_autoscaler   = true
+    kubeconfig_path             = "./kube/config"
+    kubernetes_version          = "1.14"
+    vpc_id                      = module.tf-mod-vpc.vpc_id
+    subnet_ids                  = module.tf-mod-vpc-subnets.public_subnet_ids
+    map_additional_iam_roles    = [{
+      rolearn  = "arn:aws:iam::12345678910:role/role"
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups   = ["system:masters"]
+    }]
+    map_additional_iam_users    = [{
+      userarn  = "arn:aws:iam::123456789:user/user"
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups   = ["system:masters"]
+    }]
+    map_additional_aws_accounts = ["12345678"]
+    workers_security_group_ids  = [module.tf-mod-eks-workers.security_group_id]
+    workers_role_arns           = [module.tf-mod-eks-workers.workers_role_arn]
+  }
+
+  module "tf-mod-eks-workers" {
+    source                             = "git::https://git.testplant.com/devops/tf-mod-eks-workers.git?ref=master"
+    context                            = module.label.context
+    enabled                            = true
+    aws_account_id                     = "12345678910"
+    aws_region                         = "eu-west-1"
+    worker_type                        = "managed "
+    vpc_id                             = module.tf-mod-vpc.vpc_id
+    subnet_ids                         = module.tf-mod-vpc-subnets.public_subnet_ids
+    image_id                           = "ami-123456b"
+    use_custom_image_id                = true
+    desired_size                       = 5
+    min_size                           = 1
+    max_size                           = 10
+    instance_types                     = ["t2.small", "t2.medium", "c4.small"]
+    node_group_name                    = ["epa", "rci", "dai"]
+    labels                             = {
+      node_pool = "application"
+    }
+    eks_worker_ami_name_filter         = local.eks_worker_ami_name_filter
+    ec2_ssh_key                        = module.tf-mod-aws-keypair.key_name
+    cluster_name                       = module.tf-mod-eks-cluster.eks_cluster_id
+    cluster_version                    = module.tf-mod-eks-cluster.eks_cluster_version
+    cluster_endpoint                   = module.tf-mod-eks-cluster.eks_cluster_endpoint
+    cluster_certificate_authority_data = module.tf-mod-eks-cluster.eks_cluster_certificate_authority_data
+    cluster_security_group_id          = module.tf-mod-eks-cluster.security_group_id
+  }
+  ```
+
+  ### Advanced Example 2
+
+  The following example shows an EKS cluster with two work groups:
+  ```hcl
+
+  module "tf-mod-eks-cluster" {
+    source                      = "git::https://git.testplant.com/devops/tf-mod-eks-cluster.git?ref=master"
+    enabled                     = true
+    aws_account_id              = "12345678910"
+    oidc_provider_enabled       = true
+    aws_region                  = "eu-west-1"
+    enable_dashboard            = true
+    enable_kube2iam             = false
+    enable_calico               = true
+    enable_cluster_autoscaler   = true
+    kubeconfig_path             = "./kube/config"
+    kubernetes_version          = "1.14"
+    vpc_id                      = "vpc-06ea6c4fddc9898c4"
+    subnet_ids                  = ["subnet-07bc79d21d0719c1a", "subnet-0bbadaa3bb0376c6c", "subnet-0f7201168a8f3aa3b"]
+    map_additional_iam_roles    = [{
+      rolearn  = "arn:aws:iam::12345678910:role/role"
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups   = ["system:masters"]
+    }]
+    map_additional_iam_users    = [{
+      userarn  = "arn:aws:iam::123456789:user/user"
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups   = ["system:masters"]
+    }]
+    map_additional_aws_accounts = ["12345678"]
+    workers_security_group_ids  = [module.tf-mod-eks-workers.security_group_id]
+    workers_role_arns           = [module.tf-mod-eks-workers.workers_role_arn]
+  }
+
+  module "tf-mod-eks-workers" {
+    source                             = "git::https://git.testplant.com/devops/tf-mod-eks-workers.git?ref=master"
+    context                            = module.label.context
+    enabled                            = true
+    aws_account_id                     = "12345678910"
+    aws_region                         = "eu-west-1"
+    worker_type                        = "managed "
+    vpc_id                             = "vpc-06ea6c4fddc9898c4"
+    subnet_ids                          = ["subnet-07bc79d21d0719c1a", "subnet-0bbadaa3bb0376c6c", "subnet-0f7201168a8f3aa3b"]
+    image_id                           = "ami-123456b"
+    use_custom_image_id                = true
+    desired_size                       = 5
+    min_size                           = 1
+    max_size                           = 10
+    instance_types                     = ["t2.small", "t2.medium", "c4.small"]
+    node_group_name                    = ["rci"]
+    labels                             = {
+      node_pool = "rci"
+    }
+    eks_worker_ami_name_filter         = local.eks_worker_ami_name_filter
+    ec2_ssh_key                        = "kp-keypair20200107145818946000000001"
+    cluster_name                       = module.tf-mod-eks-cluster.eks_cluster_id
+    cluster_version                    = module.tf-mod-eks-cluster.eks_cluster_version
+    cluster_endpoint                   = module.tf-mod-eks-cluster.eks_cluster_endpoint
+    cluster_certificate_authority_data = module.tf-mod-eks-cluster.eks_cluster_certificate_authority_data
+    cluster_security_group_id          = module.tf-mod-eks-cluster.security_group_id
+  }
+
+  module "tf-mod-eks-workers" {
+      source                             = "git::https://git.testplant.com/devops/tf-mod-eks-workers.git?ref=master"
+      context                            = module.label.context
+      enabled                            = true
+      aws_account_id                     = "12345678910"
+      aws_region                         = "eu-west-1"
+      worker_type                        = "managed "
+      vpc_id                             = "vpc-06ea6c4fddc9898c4"
+      subnet_ids                         = ["subnet-07bc79d21d0719c1a", "subnet-0bbadaa3bb0376c6c", "subnet-0f7201168a8f3aa3b"]
+      image_id                           = "ami-423125d"
+      use_custom_image_id                = true
+      desired_size                       = 20
+      min_size                           = 10
+      max_size                           = 30
+      instance_types                     = ["r4.xlarge", "c3.medium", "i3.small"]
+      node_group_name                    = ["dai"]
+      labels                             = {
+        node_pool = "dai"
+      }
+      eks_worker_ami_name_filter         = local.eks_worker_ami_name_filter
+      ec2_ssh_key                        = "kp-keypair20200107145818946000000001"
+      cluster_name                       = module.tf-mod-eks-cluster.eks_cluster_id
+      cluster_version                    = module.tf-mod-eks-cluster.eks_cluster_version
+      cluster_endpoint                   = module.tf-mod-eks-cluster.eks_cluster_endpoint
+      cluster_certificate_authority_data = module.tf-mod-eks-cluster.eks_cluster_certificate_authority_data
+      cluster_security_group_id          = module.tf-mod-eks-cluster.security_group_id
+    }
+  ```
+
+related:
+  - name: "tf-mod-aws-eks-cluster"
+    description: Core Eggplant Terraform module to create an Elastic Kubernetes (EKS) cluster."
+    url: "https://git.testplant.com/devops/tf-mod-eks-cluster"
+  - name: "tf-mod-aws-eks-workers"
+    description: "Core Eggplant Terraform module to provision an AWS AutoScaling Group, IAM Role, and Security Group for EKS Workers"
+    url: "https://git.testplant.com/devops/tf-mod-eks-workers"
+  - name: "tf-mod-aws-asg"
+    description: "Core Eggplant Terraform module to provision Auto Scaling Group and Launch Template on AWS"
+    url: "https://git.testplant.com/devops/tf-mod-asg"
+  - name: "tf-mod-aws-keypair"
+    description: "Core Eggplant Terraform module which creates EC2 key pair on AWS"
+    url: "https://git.testplant.com/devops/tf-mod-aws-keypair"
+  - name: "tf-mod-aws-vpc"
+    description: "Core Eggplant Terraform module for creating AWS VPC Network Stack"
+    url: "https://git.testplant.com/devops/tf-mod-vpc"
+  - name: "tf-mod-aws-vpc/subnets"
+    description: "Core Eggplant Terraform module for public and private subnets provisioning in existing VPC"
+    url: "https://git.testplant.com/devops/tf-mod-vpc/tree/master/modules/subnets"
+  - name: "tf-mod-label"
+    description: "Core Eggplant Terraform Core Module For Consistent Naming Conventions & Tagging Blocks"
+    url: "https://git.testplant.com/devops/tf-mod-label"
+  - name: "build-harness"
+    description: "The`build-harness` project is to provide a centralised repository to facilitate building documentation, Dockerfiles, Helm charts, and more."
+    url: "https://git.testplant.com/devops/build-harness"
+
+# References
+references:
+  - name: "Kubnernetes Dashboard on EKS"
+    description: "This tutorial guides you through deploying the Kubernetes dashboard to your Amazon EKS cluster, complete with CPU and memory metrics. It also helps you to create an Amazon EKS administrator service account that you can use to securely connect to the dashboard to view and control your cluster."
+    url: "https://aws.amazon.com/premiumsupport/knowledge-center/eks-cluster-kubernetes-dashboard/"
+  - name: "Installing Calico on Amazon EKS"
+    description: "This tutorial guides you through deploying Calico on Amazon EKS"
+    url: "https://docs.aws.amazon.com/eks/latest/userguide/calico.html"
+  - name: "Deploying the Kubernetes cluster autoscaler on Amazon EKS"
+    description: "This tutorial guides you through deploying the Kubernetes autoscaler on Amazon EKS"
+    url: "https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html"
+  - name: "Amazon EKS IAM Permissions to Kubernetes Service Accounts"
+    description: "This tutorial guides you through deploying the Kubernetes autoscaler on Amazon EKS"
+    url: "https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html"
+  - name: "Gruntwork-io/Kubergrunt"
+    description: "Kubergrunt is a standalone go binary with a collection of commands to fill in the gaps between Terraform, Helm, and Kubectl."
+    url: "https://github.com/gruntwork-io/kubergrunt"
+
+jira:
+  - project: "Eggplant Platform Automation"
+    project_url: "https://siteconfidence.atlassian.net/secure/RapidBoard.jspa?rapidView=200&projectKey=EPA"
+    epic: "EPA-31"
+    epic_url: "https://siteconfidence.atlassian.net/browse/EPA-31"
