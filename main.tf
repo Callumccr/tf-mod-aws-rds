@@ -9,7 +9,7 @@ locals {
   major_engine_version          = var.major_engine_version == "" ? local.computed_major_engine_version : var.major_engine_version
 }
 
-resource "aws_db_instance" "rds" {
+resource "aws_db_instance" "default" {
   count             = var.enabled ? 1 : 0
   identifier        = module.rds_label.id
   username          = var.database_user
@@ -51,7 +51,7 @@ resource "aws_db_instance" "rds" {
   final_snapshot_identifier   = length(var.final_snapshot_identifier) > 0 ? var.final_snapshot_identifier : module.final_snapshot_label.id
 }
 
-resource "aws_db_parameter_group" "rds" {
+resource "aws_db_parameter_group" "default" {
   count  = length(var.parameter_group_name) == 0 && var.enabled ? 1 : 0
   name   = module.rds_param_group.id
   family = var.db_parameter_group
@@ -67,7 +67,7 @@ resource "aws_db_parameter_group" "rds" {
   }
 }
 
-resource "aws_db_option_group" "rds" {
+resource "aws_db_option_group" "default" {
   count                = length(var.option_group_name) == 0 && var.enabled ? 1 : 0
   name                 = module.rds_option_group.id
   engine_name          = var.engine
@@ -98,14 +98,14 @@ resource "aws_db_option_group" "rds" {
   }
 }
 
-resource "aws_db_subnet_group" "rds" {
+resource "aws_db_subnet_group" "default" {
   count      = var.enabled ? 1 : 0
   name       = module.subnet_group_label.id
   subnet_ids = var.subnet_ids
   tags       = module.subnet_group_label.tags
 }
 
-resource "aws_security_group" "rds" {
+resource "aws_security_group" "default" {
   count       = var.enabled ? length(var.security_group_ids) : 0
   name        = module.rds_sg.id
   description = "Allow inbound traffic from the security groups"
