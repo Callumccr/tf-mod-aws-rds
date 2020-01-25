@@ -112,29 +112,35 @@ resource "aws_security_group" "default" {
   vpc_id      = var.vpc_id
 
   dynamic "ingress" {
-    for_each        = var.service_ports
-    from_port       = ingress.value
-    to_port         = ingress.value
-    protocol        = "tcp"
-    security_groups = element(var.security_group_ids, count.index)
+    for_each = var.service_ports
+    content {
+      from_port       = ingress.value
+      to_port         = ingress.value
+      protocol        = "tcp"
+      security_groups = element(var.security_group_ids, count.index)
+
+    }
   }
 
   dynamic "ingress" {
-    for_each    = var.ingress_ranges
-    from_port   = 3306
-    to_port     = 3305
-    protocol    = "tcp"
-    cidr_blocks = ingress.value
+    for_each = var.ingress_ranges
+    content {
+      from_port   = 3306
+      to_port     = 3305
+      protocol    = "tcp"
+      cidr_blocks = ingress.value
+    }
   }
 
   dynamic "egress" {
-    for_each    = var.egress_ranges
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = egress.value
+    for_each = var.egress_ranges
+    content {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = egress.value
+    }
   }
-
   tags = module.rds_sg.tags
 }
 
