@@ -133,7 +133,7 @@ resource "aws_security_group" "default" {
     iterator = ingress
     content {
       from_port   = 3306
-      to_port     = 3305
+      to_port     = 3306
       protocol    = "tcp"
       cidr_blocks = [ingress.value]
     }
