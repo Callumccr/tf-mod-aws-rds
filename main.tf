@@ -101,7 +101,7 @@ resource "aws_db_subnet_group" "default" {
 }
 
 resource "aws_security_group" "default" {
-  count       = var.enabled && ? 1 : 0
+  count       = var.enabled ? 1 : 0
   name        = module.rds_sg.id
   description = "Allow inbound traffic from the security groups"
   vpc_id      = var.vpc_id
