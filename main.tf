@@ -130,21 +130,23 @@ resource "aws_security_group" "default" {
 
   dynamic "ingress" {
     for_each = var.ingress_ranges
+    iterator = ingress
     content {
       from_port   = 3306
       to_port     = 3305
       protocol    = "tcp"
-      cidr_blocks = ingress.value
+      cidr_blocks = [ingress.value]
     }
   }
 
   dynamic "egress" {
     for_each = var.egress_ranges
+    iterator = egress
     content {
       from_port   = 0
       to_port     = 0
       protocol    = "-1"
-      cidr_blocks = egress.value
+      cidr_blocks = [egress.value]
     }
   }
   tags = module.rds_sg.tags
