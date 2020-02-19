@@ -22,7 +22,7 @@ resource "aws_db_instance" "default" {
   storage_encrypted = var.storage_encrypted
   kms_key_id        = var.kms_key_arn
 
-  vpc_security_group_ids = [aws_security_group.default.0.id, var.associate_security_group_ids]
+  vpc_security_group_ids = concat(aws_security_group.default.0.id, var.associate_security_group_ids)
 
   db_subnet_group_name        = join("", aws_db_subnet_group.default.*.name)
   parameter_group_name        = join("", aws_db_parameter_group.default.*.name)
