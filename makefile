@@ -3,7 +3,7 @@ export README_FILE ?= README.md
 export README_YAML ?= README.yaml
 export README_TEMPLATE_FILE ?= ./templates/README.md.gotmpl
 export README_TEMPLATE_YAML := README.yaml
-
+# export README_TEMPLATE_YAML := $(if $(findstring http,$(README_YAML)),$(README_YAML),$(BUILD_HARNESS_PATH)/templates/$(README_YAML))
 export README_INCLUDES ?= $(file://$(shell pwd)/?type=text/plain)
 
 ## Alias for readme/build
