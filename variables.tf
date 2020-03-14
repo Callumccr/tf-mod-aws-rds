@@ -50,19 +50,19 @@ variable "security_group_ids" {
 
 variable "service_ports" {
   type        = list(string)
-  default     = ["11211", "-1", "1"]
+  default     = [""]
   description = "MemcacheD service ports"
 }
 
 variable "ingress_ranges" {
   type        = list(string)
-  default     = ["10.1.5.0/24", "10.212.134.0/24"]
+  default     = [""]
   description = "RDS ingress ranges"
 }
 
 variable "egress_ranges" {
   type        = list(string)
-  default     = ["52.94.13.0/24", "54.231.240.0/22", "52.95.128.0/21", "52.92.52.0/22", "52.219.32.0/21", "52.219.40.0/22", "54.231.252.0/24", "54.231.248.0/22", "52.219.76.0/22", "52.92.56.0/22"]
+  default     = [""]
   description = "RDS egress ranges"
 }
 
