@@ -68,13 +68,13 @@ variable "service_ports" {
 
 variable "ingress_ranges" {
   type        = list(string)
-  default     = [""]
+  default     = []
   description = "(Optional) - RDS ingress ranges"
 }
 
 variable "egress_ranges" {
   type        = list(string)
-  default     = [""]
+  default     = []
   description = "(Optional) - RDS egress ranges"
 }
 
