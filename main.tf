@@ -1,6 +1,6 @@
 module "final_snapshot_label" {
   source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.14.1"
-  context    = var.context
+  context    = module.label.context
   attributes = compact(concat(var.attributes, ["final", "snapshot"]))
 }
 
