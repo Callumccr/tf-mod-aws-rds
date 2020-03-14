@@ -48,7 +48,7 @@
 ## Module description
 
 
-Use the `tf-mod-aws-rds` Terraform module to provision a AWS RDS instance
+Use the `tf-mod-aws-rds` module to provision a AWS RDS instance, option group, parameter group, subnet group, db security group, and correlated DNS record.
 
 
 
@@ -60,7 +60,7 @@ Project: **[%!s(<nil>)](%!s(<nil>))** : [[%!s(<nil>)](%!s(<nil>))] | [[%!s(<nil>
 
 ## Introduction
 
-The module will create:
+The `tf-mod-aws-rds` module will create:
 * DB instance (MySQL, Postgres, SQL Server, Oracle)
 * DB Option Group (will create a new one or you may use an existing)
 * DB Parameter Group

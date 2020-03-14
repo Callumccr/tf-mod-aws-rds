@@ -11,7 +11,7 @@ locals {
 
 resource "aws_db_instance" "default" {
   count             = var.enabled ? 1 : 0
-  identifier        = module.rds_label.id
+  identifier        = module.label.id
   username          = var.database_user
   password          = var.database_password
   port              = var.database_port
@@ -41,7 +41,7 @@ resource "aws_db_instance" "default" {
   copy_tags_to_snapshot       = var.copy_tags_to_snapshot
   backup_retention_period     = var.backup_retention_period
   backup_window               = var.backup_window
-  tags                        = module.rds_label.tags
+  tags                        = module.label.tags
   deletion_protection         = var.deletion_protection
   final_snapshot_identifier   = length(var.final_snapshot_identifier) > 0 ? var.final_snapshot_identifier : module.final_snapshot_label.id
 }
