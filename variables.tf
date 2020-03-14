@@ -62,7 +62,7 @@ variable "security_group_ids" {
 
 variable "service_ports" {
   type        = list(string)
-  default     = [""]
+  default     = []
   description = "(Optional) - MemcacheD service ports"
 }
 

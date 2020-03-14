@@ -184,12 +184,12 @@ TO-DO
 | deletion\_protection | (Optional) - Set to true to enable deletion protection on the RDS instance | `bool` | `false` | no |
 | delimiter | (Optional) - Delimiter to be used between `namespace`, `environment`, `stage`, `name` and `attributes` | `string` | `"-"` | no |
 | dns\_zone\_id | (Optional) -The ID of the DNS Zone in Route53 where a new DNS record will be created for the DB host name | `string` | `""` | no |
-| egress\_ranges | (Optional) - RDS egress ranges | `list(string)` | <code><pre>[<br>  ""<br>]<br></pre></code> | no |
+| egress\_ranges | (Optional) - RDS egress ranges | `list(string)` | `[]` | no |
 | enabled | (Optional) - A Switch that decides whether to create a terraform resource or run a provisioner. Default is true | `bool` | `true` | no |
 | environment | (Optional) - Environment, e.g. 'dev', 'qa', 'staging', 'prod' | `string` | `""` | no |
 | final\_snapshot\_identifier | (Optional) - Final snapshot identifier e.g.: some-db-final-snapshot-2019-06-26-06-05 | `string` | `""` | no |
 | host\_name | (Optional) - The DB host name created in Route53 | `string` | `"db"` | no |
-| ingress\_ranges | (Optional) - RDS ingress ranges | `list(string)` | <code><pre>[<br>  ""<br>]<br></pre></code> | no |
+| ingress\_ranges | (Optional) - RDS ingress ranges | `list(string)` | `[]` | no |
 | iops | (Optional) - The amount of provisioned IOPS. Setting this implies a storage\_type of 'io1'. Default is 0 if rds storage type is not 'io1' | `number` | `0` | no |
 | kms\_key\_arn | (Optional) - The ARN of the existing KMS key to encrypt storage | `string` | `""` | no |
 | license\_model | (Optional) - License model for this DB. Optional, but required for some DB Engines. Valid values: license-included \| bring-your-own-license \| general-public-license | `string` | `""` | no |
@@ -202,7 +202,7 @@ TO-DO
 | parameter\_group\_name | (Optional) - Name of the DB parameter group to associate | `string` | `""` | no |
 | publicly\_accessible | (Optional) - Determines if database can be publicly available (NOT recommended) | `bool` | `false` | no |
 | security\_group\_ids | (Optional) - Security Group IDs to pass to the module security group for 'ingress' traffic | `list(string)` | `[]` | no |
-| service\_ports | (Optional) - MemcacheD service ports | `list(string)` | <code><pre>[<br>  ""<br>]<br></pre></code> | no |
+| service\_ports | (Optional) - MemcacheD service ports | `list(string)` | `[]` | no |
 | skip\_final\_snapshot | (Optional) - If true (default), no snapshot will be made before deleting DB | `bool` | `true` | no |
 | snapshot\_identifier | (Optional) - Snapshot identifier e.g: rds:production-2019-06-26-06-05. If specified, the module create cluster from the snapshot | `string` | `""` | no |
 | storage\_encrypted | (Optional) Specifies whether the DB instance is encrypted. The default is false if not specified | `bool` | `false` | no |
