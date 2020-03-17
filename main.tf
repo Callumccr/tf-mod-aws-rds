@@ -107,48 +107,49 @@ resource "aws_security_group" "default" {
   vpc_id      = var.vpc_id
 
   dynamic "ingress" {
-    for_each = var.service_ports
-    iterator = ingress
+    for_each    = var.service_ports
+    iterator    = ingress
+    description = "Allow inbound traffic from existing Security Groups"
     content {
       from_port       = ingress.value
       to_port         = ingress.value
       protocol        = "tcp"
-      security_groups = length(var.security_group_ids) > 0 ? element(var.security_group_ids, count.index) : null
-    }
-  }
-
-  dynamic "egress" {
-    for_each = var.service_ports
-    iterator = egress
-    content {
-      from_port       = egress.value
-      to_port         = egress.value
-      protocol        = "tcp"
-      security_groups = length(var.security_group_ids) > 0 ? element(var.security_group_ids, count.index) : null
+      security_groups = length(var.allowed_security_groups) > 0 ? element(var.allowed_security_groups, count.index) : null
     }
   }
 
   dynamic "ingress" {
-    for_each = var.ingress_ranges
-    iterator = ingress
+    for_each    = var.allowed_cidr_blocks
+    iterator    = ingress
+    description = "Allow inbound traffic to internal CIDR ranges"
     content {
-      from_port   = 3306
-      to_port     = 3306
+      from_port   = var.database_port
+      to_port     = var.database_port
       protocol    = "tcp"
-      cidr_blocks = [ingress.value]
+      cidr_blocks = length(var.allowed_cidr_blocks) > 0 ? [ingress.value] : null
     }
   }
 
   dynamic "egress" {
-    for_each = var.egress_ranges
-    iterator = egress
+    for_each    = var.service_ports
+    iterator    = egress
+    description = "Allow egress traffic to existing Security Groups"
     content {
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      cidr_blocks = [egress.value]
+      from_port   = egress.value
+      to_port     = egress.value
+      protocol    = "tcp"
+      cidr_blocks = length(var.allowed_security_groups) > 0 ? element(var.allowed_security_groups, count.index) : null
     }
   }
+
+  egress {
+    description = "Allow all egress traffic"
+    from_port   = "-1"
+    to_port     = "-1"
+    protocol    = "tcp"
+    cidr_blocks = var.allow_all_egress ? ["0.0.0.0/0"] : null
+  }
+
   tags = module.rds_sg.tags
 }
 

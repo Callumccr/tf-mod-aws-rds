@@ -54,10 +54,10 @@ variable "host_name" {
   description = "(Optional) - The DB host name created in Route53"
 }
 
-variable "security_group_ids" {
+variable "allowed_security_groups" {
   type        = list(string)
   default     = []
-  description = "(Optional) - Security Group IDs to pass to the module security group for 'ingress' traffic"
+  description = "(Optional) - List of Security Group IDs that are allowed ingress to the RDS Security Group created in the module"
 }
 
 variable "service_ports" {
@@ -66,16 +66,10 @@ variable "service_ports" {
   description = "(Optional) - MemcacheD service ports"
 }
 
-variable "ingress_ranges" {
+variable "allowed_cidr_blocks" {
   type        = list(string)
   default     = []
-  description = "(Optional) - RDS ingress ranges"
-}
-
-variable "egress_ranges" {
-  type        = list(string)
-  default     = []
-  description = "(Optional) - RDS egress ranges"
+  description = "(Optional) - List of CIDR blocks that are allowed ingress to the cluster's Security Group created in the module"
 }
 
 variable "associate_security_group_ids" {
@@ -105,6 +99,12 @@ variable "database_password" {
 variable "database_port" {
   type        = number
   description = "(Required) - Database port (_e.g._ `3306` for `MySQL`). Used in the DB Security Group to allow access to the DB instance from the provided `security_group_ids`"
+}
+
+variable "allow_all_egress" {
+  type        = bool
+  description = "(Required) - Whether to allow egress to (0.0.0.0/0) from the database"
+  default     = true
 }
 
 variable "deletion_protection" {

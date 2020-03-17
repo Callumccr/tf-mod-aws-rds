@@ -14,6 +14,7 @@ module "subnet_group_label" {
   attributes         = ["subnet-group"]
   delimiter          = "-"
   additional_tag_map = {} /* Additional attributes (e.g. 1) */
+  label_order        = ["environment", "namespace", "name", "attributes"]
 }
 module "rds_param_group" {
   source             = "git::https://github.com/Callumccr/tf-mod-label.git?ref=master"
@@ -21,6 +22,7 @@ module "rds_param_group" {
   attributes         = ["parameter-group"]
   delimiter          = "-"
   additional_tag_map = {} /* Additional attributes (e.g. 1) */
+  label_order        = ["environment", "namespace", "name", "attributes"]
 }
 
 module "rds_option_group" {
@@ -29,6 +31,7 @@ module "rds_option_group" {
   attributes         = ["option-group"]
   delimiter          = "-"
   additional_tag_map = {} /* Additional attributes (e.g. 1) */
+  label_order        = ["environment", "namespace", "name", "attributes"]
 }
 module "rds_sg" {
   source             = "git::https://github.com/Callumccr/tf-mod-label.git?ref=master"
@@ -36,4 +39,5 @@ module "rds_sg" {
   attributes         = ["sg"]
   delimiter          = "-"
   additional_tag_map = {} /* Additional attributes (e.g. 1) */
+  label_order        = ["environment", "namespace", "name", "attributes"]
 }
