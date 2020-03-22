@@ -12,9 +12,9 @@ locals {
 resource "aws_db_instance" "default" {
   count             = var.enabled ? 1 : 0
   identifier        = module.label.id
-  username          = var.database_user
-  password          = var.database_password
-  port              = var.database_port
+  username          = var.username
+  password          = var.password
+  port              = var.port
   engine            = var.engine
   engine_version    = var.engine_version
   instance_class    = var.instance_class
@@ -22,7 +22,7 @@ resource "aws_db_instance" "default" {
   storage_encrypted = var.storage_encrypted
   kms_key_id        = var.kms_key_arn
 
-  vpc_security_group_ids = concat([aws_security_group.default[0].id], var.associate_security_group_ids)
+  vpc_security_group_ids = var.use_existing_security_groups == true ? var.existing_security_groups : [aws_security_group.default.0.id]
 
   db_subnet_group_name        = join("", aws_db_subnet_group.default.*.name)
   parameter_group_name        = join("", aws_db_parameter_group.default.*.name)
@@ -101,63 +101,53 @@ resource "aws_db_subnet_group" "default" {
 }
 
 resource "aws_security_group" "default" {
-  count       = var.enabled ? 1 : 0
-  name        = module.rds_sg.id
-  description = "Allow inbound traffic from the security groups"
-  vpc_id      = var.vpc_id
+  count  = var.enabled && var.use_existing_security_groups == false ? 1 : 0
+  vpc_id = var.vpc_id
+  name   = module.rds_sg.id
+  tags   = module.rds_sg.tags
 
   dynamic "ingress" {
-    for_each    = var.service_ports
-    iterator    = ingress
-    description = "Allow inbound traffic from existing Security Groups"
+    for_each = length(var.allowed_security_groups) > 0 ? [var.port] : null
+    iterator = ingress
     content {
+      description     = "Allow inbound traffic from existing Security Groups"
       from_port       = ingress.value
       to_port         = ingress.value
       protocol        = "tcp"
-      security_groups = length(var.allowed_security_groups) > 0 ? element(var.allowed_security_groups, count.index) : null
+      security_groups = var.allowed_security_groups
     }
   }
 
   dynamic "ingress" {
-    for_each    = var.allowed_cidr_blocks
-    iterator    = ingress
-    description = "Allow inbound traffic to internal CIDR ranges"
+    for_each = length(var.allowed_security_groups) > 0 ? var.allowed_cidr_blocks : null
+    iterator = ingress
     content {
-      from_port   = var.database_port
-      to_port     = var.database_port
+      description = "Allow inbound traffic to internal CIDR ranges"
+      from_port   = var.port
+      to_port     = var.port
       protocol    = "tcp"
-      cidr_blocks = length(var.allowed_cidr_blocks) > 0 ? [ingress.value] : null
+      cidr_blocks = [ingress.value]
     }
   }
 
   dynamic "egress" {
-    for_each    = var.service_ports
-    iterator    = egress
-    description = "Allow egress traffic to existing Security Groups"
+    for_each = var.allow_all_egress == true ? ["0.0.0.0/0"] : null
+    iterator = ingress
     content {
-      from_port   = egress.value
-      to_port     = egress.value
-      protocol    = "tcp"
-      cidr_blocks = length(var.allowed_security_groups) > 0 ? element(var.allowed_security_groups, count.index) : null
+      description = "Allow inbound traffic to internal CIDR ranges"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = [ingress.value]
     }
   }
-
-  egress {
-    description = "Allow all egress traffic"
-    from_port   = "-1"
-    to_port     = "-1"
-    protocol    = "tcp"
-    cidr_blocks = var.allow_all_egress ? ["0.0.0.0/0"] : null
-  }
-
-  tags = module.rds_sg.tags
 }
 
-# Need to clarify with Roger & Ivan if we're going to need DNS
-# module "dns_host_name" {
-#   source  = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.3.0"
-#   enabled = length(var.dns_zone_id) > 0 && var.enabled ? true : false
-#   name    = var.host_name
-#   zone_id = var.dns_zone_id
-#   records = coalescelist(aws_db_instance.default.*.address, [""])
-# }
+module "dns" {
+  source  = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.3.0"
+  enabled = var.enabled && var.zone_id != "" ? true : false
+  name    = var.name
+  ttl     = 60
+  zone_id = var.zone_id
+  records = coalescelist(aws_db_instance.default.*.address, [""])
+}

@@ -42,7 +42,7 @@ variable "enabled" {
   default     = true
 }
 
-variable "dns_zone_id" {
+variable "zone_id" {
   type        = string
   default     = ""
   description = "(Optional) -The ID of the DNS Zone in Route53 where a new DNS record will be created for the DB host name"
@@ -54,49 +54,25 @@ variable "host_name" {
   description = "(Optional) - The DB host name created in Route53"
 }
 
-variable "allowed_security_groups" {
-  type        = list(string)
-  default     = []
-  description = "(Optional) - List of Security Group IDs that are allowed ingress to the RDS Security Group created in the module"
-}
-
-variable "service_ports" {
-  type        = list(string)
-  default     = []
-  description = "(Optional) - MemcacheD service ports"
-}
-
-variable "allowed_cidr_blocks" {
-  type        = list(string)
-  default     = []
-  description = "(Optional) - List of CIDR blocks that are allowed ingress to the cluster's Security Group created in the module"
-}
-
-variable "associate_security_group_ids" {
-  type        = list(string)
-  default     = []
-  description = "(Optional) - The IDs of the existing security groups to associate with the DB instance"
-}
-
-variable "database_name" {
+variable "db_name" {
   type        = string
   description = "(Optional) - The name of the database to create when the DB instance is created"
   default     = ""
 }
 
-variable "database_user" {
+variable "username" {
   type        = string
   default     = ""
   description = "(Optional) - (Required unless a `snapshot_identifier` or `replicate_source_db` is provided) Username for the master DB user"
 }
 
-variable "database_password" {
+variable "password" {
   type        = string
   default     = ""
   description = "(Optional) - (Required unless a snapshot_identifier or replicate_source_db is provided) Password for the master DB user"
 }
 
-variable "database_port" {
+variable "port" {
   type        = number
   description = "(Required) - Database port (_e.g._ `3306` for `MySQL`). Used in the DB Security Group to allow access to the DB instance from the provided `security_group_ids`"
 }
@@ -306,6 +282,36 @@ variable "kms_key_arn" {
   type        = string
   description = "(Optional) - The ARN of the existing KMS key to encrypt storage"
   default     = ""
+}
+
+variable "use_existing_security_groups" {
+  type        = bool
+  description = "(Optional) - Flag to enable/disable creation of Security Group in the module. Set to `true` to disable Security Group creation and provide a list of existing security Group IDs in `existing_security_groups` to place the cluster into"
+  default     = false
+}
+
+variable "existing_security_groups" {
+  type        = list(string)
+  default     = []
+  description = "(Optional) - List of existing Security Group IDs to place the cluster into. Set `use_existing_security_groups` to `true` to enable using `existing_security_groups` as Security Groups for the cluster"
+}
+
+variable "allowed_security_groups" {
+  type        = list(string)
+  default     = []
+  description = "(Optional) - List of Security Group IDs that are allowed ingress to RDS"
+}
+
+variable "allow_all_egress" {
+  type        = bool
+  description = "(Required) - Whether to allow ALL egress (0.0.0.0/0) from RDS"
+  default     = true
+}
+
+variable "allowed_cidr_blocks" {
+  type        = list(string)
+  default     = []
+  description = "(Optional) - List of CIDR blocks that are allowed ingress to the RDS"
 }
 
 # -----------------------------------------------------------------------------
