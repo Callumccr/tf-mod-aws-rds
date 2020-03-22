@@ -77,12 +77,6 @@ variable "port" {
   description = "(Required) - Database port (_e.g._ `3306` for `MySQL`). Used in the DB Security Group to allow access to the DB instance from the provided `security_group_ids`"
 }
 
-variable "allow_all_egress" {
-  type        = bool
-  description = "(Required) - Whether to allow egress to (0.0.0.0/0) from the database"
-  default     = true
-}
-
 variable "deletion_protection" {
   type        = bool
   description = "(Optional) - Set to true to enable deletion protection on the RDS instance"
