@@ -46,3 +46,15 @@ output "hostname" {
   value       = module.dns.hostname
   description = "RDS hostname"
 }
+
+output "username" {
+  value       = aws_db_option_group.default.*.username
+  description = "The username  for logging in to the database."
+  sensitive   = true
+}
+
+output "password" {
+  value       = aws_db_option_group.default.*.password
+  description = "The password for logging in to the database."
+  sensitive   = trues
+}
