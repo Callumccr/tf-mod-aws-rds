@@ -63,14 +63,12 @@ variable "db_name" {
 variable "username" {
   type        = string
   default     = ""
-  sensitive   = true
   description = "(Optional) - (Required unless a `snapshot_identifier` or `replicate_source_db` is provided) Username for the master DB user"
 }
 
 variable "password" {
   type        = string
   default     = ""
-  sensitive   = true
   description = "(Optional) - (Required unless a snapshot_identifier or replicate_source_db is provided) Password for the master DB user"
 }
 

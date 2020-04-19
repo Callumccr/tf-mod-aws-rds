@@ -56,5 +56,5 @@ output "username" {
 output "password" {
   value       = element(aws_db_option_group.default.*.password, 0)
   description = "The password for logging in to the database."
-  sensitive   = trues
+  sensitive   = true
 }
