@@ -48,13 +48,13 @@ output "hostname" {
 }
 
 output "username" {
-  value       = aws_db_option_group.default.*.username
+  value       = aws_db_option_group.default.0.username
   description = "The username  for logging in to the database."
-  sensitive   = true
+  # sensitive   = true
 }
 
 output "password" {
-  value       = aws_db_option_group.default.*.password
+  value       = var.password
   description = "The password for logging in to the database."
-  sensitive   = true
+  # sensitive   = true
 }
