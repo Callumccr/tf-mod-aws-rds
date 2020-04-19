@@ -7,6 +7,7 @@ module "final_snapshot_label" {
 resource "aws_db_instance" "default" {
   count             = var.enabled ? 1 : 0
   identifier        = module.label.id
+  name              = var.db_name
   username          = var.username
   password          = var.password
   port              = var.port
