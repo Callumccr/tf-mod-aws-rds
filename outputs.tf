@@ -17,6 +17,11 @@ output "instance_address" {
   description = "Address of the instance"
 }
 
+output "instance_name" {
+  value       = aws_db_instance.default.*.name
+  description = "Databse name of the instance"
+}
+
 output "instance_endpoint" {
   value       = aws_db_instance.default.*.endpoint
   description = "DNS Endpoint of the instance"
