@@ -48,7 +48,7 @@ output "hostname" {
 }
 
 output "username" {
-  value       = aws_db_option_group.default.0.username
+  value       = aws_db_option_group.default.*.username
   description = "The username  for logging in to the database."
   # sensitive   = true
 }
