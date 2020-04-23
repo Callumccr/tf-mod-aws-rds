@@ -152,14 +152,14 @@ TO-DO
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:-----:|
-| allocated\_storage | (Required) - The allocated storage in GBs | `number` | n/a | yes |
 | db\_parameter\_group | (Required) - Parameter group, depends on DB engine used | `string` | n/a | yes |
-| engine | (Requied) - Database engine type | `string` | n/a | yes |
+| engine | The database engine to use. For supported values, see the Engine parameter in API action CreateDBInstance. | `string` | n/a | yes |
 | engine\_version | (Required) - Database engine version, depends on engine type | `string` | n/a | yes |
 | instance\_class | (Required) - Class of RDS instance | `string` | n/a | yes |
 | port | (Required) - Database port (\_e.g.\_ `3306` for `MySQL`). Used in the DB Security Group to allow access to the DB instance from the provided `security_group_ids` | `number` | n/a | yes |
 | subnet\_ids | (Required) - List of subnets for the DB | `list(string)` | n/a | yes |
 | vpc\_id | (Required) - VPC ID the DB instance will be created in | `string` | n/a | yes |
+| allocated\_storage | (Required) - The allocated storage in gibibytes. If max\_allocated\_storage is configured, this argument represents the initial storage allocation and differences from the configuration will be ignored automatically when Storage Autoscaling occurs. | `number` | `10` | no |
 | allow\_all\_egress | (Required) - Whether to allow ALL egress (0.0.0.0/0) from RDS | `bool` | `true` | no |
 | allow\_major\_version\_upgrade | (Optional) - Allow major version upgrade | `bool` | `false` | no |
 | allowed\_cidr\_blocks | (Optional) - List of CIDR blocks that are allowed ingress to the RDS | `list(string)` | `[]` | no |
@@ -190,12 +190,13 @@ TO-DO
 | license\_model | (Optional) - License model for this DB. Optional, but required for some DB Engines. Valid values: license-included \| bring-your-own-license \| general-public-license | `string` | `""` | no |
 | maintenance\_window | (Optional) - The window to perform maintenance in. Syntax: 'ddd:hh24:mi-ddd:hh24:mi' UTC | `string` | `"Mon:03:00-Mon:04:00"` | no |
 | major\_engine\_version | (Optional) - Database MAJOR engine version, depends on engine type | `string` | `""` | no |
+| max\_allocated\_storage | (Required) - When configured, the upper limit to which Amazon RDS can automatically scale the storage of the DB instance. Configuring this will automatically ignore differences to allocated\_storage. Must be greater than or equal to allocated\_storage or 0 to disable Storage Autoscaling. | `number` | `100` | no |
 | multi\_az | (Optional) - Set to true if multi AZ deployment must be supported | `bool` | `false` | no |
 | name | (Optional) - Solution name, e.g. 'vault', 'consul', 'keycloak', 'k8s', or 'baseline' | `string` | `""` | no |
 | namespace | (Optional) - Namespace, which could be your abbreviated product team, e.g. 'rci', 'mi', 'hp', or 'core' | `string` | `""` | no |
 | option\_group\_name | (Optional) - Name of the DB option group to associate | `string` | `""` | no |
 | parameter\_group\_name | (Optional) - Name of the DB parameter group to associate | `string` | `""` | no |
-| password | (Optional) - (Required unless a snapshot\_identifier or replicate\_source\_db is provided) Password for the master DB user | `string` | `""` | no |
+| password | (Optional) - Password for the master DB user. Note that this may show up in logs, and it will be stored in the state file. | `string` | `""` | no |
 | publicly\_accessible | (Optional) - Determines if database can be publicly available (NOT recommended) | `bool` | `false` | no |
 | skip\_final\_snapshot | (Optional) - If true (default), no snapshot will be made before deleting DB | `bool` | `true` | no |
 | snapshot\_identifier | (Optional) - Snapshot identifier e.g: rds:production-2019-06-26-06-05. If specified, the module create cluster from the snapshot | `string` | `""` | no |
@@ -203,7 +204,7 @@ TO-DO
 | storage\_type | (Optional) - One of 'standard' (magnetic), 'gp2' (general purpose SSD), or 'io1' (provisioned IOPS SSD) | `string` | `"standard"` | no |
 | tags | (Optional) - Additional tags | `map(string)` | `{}` | no |
 | use\_existing\_security\_groups | (Optional) - Flag to enable/disable creation of Security Group in the module. Set to `true` to disable Security Group creation and provide a list of existing security Group IDs in `existing_security_groups` to place the cluster into | `bool` | `false` | no |
-| username | (Optional) - (Required unless a `snapshot_identifier` or `replicate_source_db` is provided) Username for the master DB user | `string` | `""` | no |
+| username | (Optional) - Username for the master DB user. | `string` | `""` | no |
 | zone\_id | (Optional) -The ID of the DNS Zone in Route53 where a new DNS record will be created for the DB host name | `string` | `""` | no |
 
 ## Outputs
