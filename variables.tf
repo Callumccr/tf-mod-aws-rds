@@ -63,13 +63,13 @@ variable "db_name" {
 variable "username" {
   type        = string
   default     = ""
-  description = "(Optional) - (Required unless a `snapshot_identifier` or `replicate_source_db` is provided) Username for the master DB user"
+  description = "(Optional) - Username for the master DB user."
 }
 
 variable "password" {
   type        = string
   default     = ""
-  description = "(Optional) - (Required unless a snapshot_identifier or replicate_source_db is provided) Password for the master DB user"
+  description = "(Optional) - Password for the master DB user. Note that this may show up in logs, and it will be stored in the state file."
 }
 
 variable "port" {
@@ -109,17 +109,20 @@ variable "iops" {
 
 variable "allocated_storage" {
   type        = number
-  description = "(Required) - The allocated storage in GBs"
+  description = "(Required) - The allocated storage in gibibytes. If max_allocated_storage is configured, this argument represents the initial storage allocation and differences from the configuration will be ignored automatically when Storage Autoscaling occurs."
+  default     = 10
+}
+
+variable "max_allocated_storage" {
+  type        = number
+  description = "(Required) - When configured, the upper limit to which Amazon RDS can automatically scale the storage of the DB instance. Configuring this will automatically ignore differences to allocated_storage. Must be greater than or equal to allocated_storage or 0 to disable Storage Autoscaling."
+  default     = 100
 }
 
 variable "engine" {
   type        = string
-  description = "(Requied) - Database engine type"
+  description = "The database engine to use. For supported values, see the Engine parameter in API action CreateDBInstance."
   # http://docs.aws.amazon.com/cli/latest/reference/rds/create-db-instance.html
-  # - mysql
-  # - postgres
-  # - oracle-*
-  # - sqlserver-*
 }
 
 variable "engine_version" {
