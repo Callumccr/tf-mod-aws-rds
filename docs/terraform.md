@@ -17,6 +17,7 @@
 | vpc\_id | (Required) - VPC ID the DB instance will be created in | `string` | n/a | yes |
 | allocated\_storage | (Required) - The allocated storage in gibibytes. If max\_allocated\_storage is configured, this argument represents the initial storage allocation and differences from the configuration will be ignored automatically when Storage Autoscaling occurs. | `number` | `10` | no |
 | allow\_all\_egress | (Required) - Whether to allow ALL egress (0.0.0.0/0) from RDS | `bool` | `true` | no |
+| allow\_all\_self | If true, the security group itself will be added as a source to this egress rule. | `bool` | `true` | no |
 | allow\_major\_version\_upgrade | (Optional) - Allow major version upgrade | `bool` | `false` | no |
 | allowed\_cidr\_blocks | (Optional) - List of CIDR blocks that are allowed ingress to the RDS | `list(string)` | `[]` | no |
 | allowed\_security\_groups | (Optional) - List of Security Group IDs that are allowed ingress to RDS | `list(string)` | `[]` | no |

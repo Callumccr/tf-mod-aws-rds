@@ -305,6 +305,12 @@ variable "allow_all_egress" {
   default     = true
 }
 
+variable "allow_all_self" {
+  type        = bool
+  description = "If true, the security group itself will be added as a source to this egress rule."
+  default     = true
+}
+
 variable "allowed_cidr_blocks" {
   type        = list(string)
   default     = []

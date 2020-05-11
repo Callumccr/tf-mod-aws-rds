@@ -138,6 +138,30 @@ resource "aws_security_group" "default" {
       cidr_blocks = [ingress.value]
     }
   }
+  // self sg rules
+  dynamic "ingress" {
+    for_each = var.allow_all_self == true ? [""] : null
+    iterator = ingress
+    content {
+      description = "Allow outbound traffic to withn the security group"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      self        = true
+    }
+  }
+
+  dynamic "egress" {
+    for_each = var.allow_all_self == true ? [""] : null
+    iterator = ingress
+    content {
+      description = "Allow outbound traffic to within the security group"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      self        = true
+    }
+  }
 }
 
 module "dns" {
