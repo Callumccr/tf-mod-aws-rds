@@ -53,7 +53,7 @@ output "hostname" {
 }
 
 output "username" {
-  value       = aws_db_instance.default.*.username
+  value       = element(aws_db_instance.default.*.username, 0)
   description = "The username  for logging in to the database."
   # sensitive   = true
 }
